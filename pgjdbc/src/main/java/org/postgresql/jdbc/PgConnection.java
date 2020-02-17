@@ -7,6 +7,7 @@ package org.postgresql.jdbc;
 
 import org.postgresql.Driver;
 import org.postgresql.PGNotification;
+import org.postgresql.PGNotificationListener;
 import org.postgresql.PGProperty;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
@@ -669,6 +670,28 @@ public class PgConnection implements BaseConnection {
   public void addDataType(String type, Class<? extends PGobject> klass) throws SQLException {
     checkClosed();
     typeCache.addDataType(type, klass);
+  }
+
+  @Override
+  public void addNotificationListener(PGNotificationListener notificationListener) throws SQLException {
+    PgConnection connection = this;
+    new Thread( new Runnable() {
+      public void run() {
+        while (true) {
+          try {
+            PGNotification[] notifications = connection.getNotifications();
+
+            if (notifications != null) {
+              for (PGNotification notification : notifications) {
+                notificationListener.handleNotification(notification);
+              }
+            }
+          } catch (SQLException e ) {
+            notificationListener.handleSQLException(e);
+          }
+        }
+      }
+    }).start();
   }
 
   // This initialises the objectTypes hash map

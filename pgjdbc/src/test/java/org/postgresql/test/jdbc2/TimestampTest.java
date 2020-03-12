@@ -30,6 +30,9 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -570,6 +573,30 @@ public class TimestampTest extends BaseTest4 {
 
     rs.close();
     stmt.close();
+  }
+
+
+  /*
+   * Tests that inserting the Java LocalDateTime.MAX into PostgreSQL results in expected values in the db
+   */
+  @Test
+  public void testMax() throws SQLException {
+    // Insert max time
+    OffsetDateTime javaMaxTime = LocalDateTime.MAX.atOffset(ZoneOffset.UTC).withYear(9999);
+    PreparedStatement pstmt = con.prepareStatement("INSERT INTO " + TSWTZ_TABLE + " (ts) VALUES (?)");
+    pstmt.setObject(1, javaMaxTime);
+    pstmt.execute();
+
+    // Get max time
+    Statement st = con.createStatement();
+    ResultSet rs = st.executeQuery("SELECT ts FROM " + TSWTZ_TABLE);
+    rs.next();
+    Timestamp max = rs.getTimestamp("ts");
+
+    // Confirm max times are equal
+    assertEquals("Inserted Java LocalDateTime max should equal PostgreSQL datetime max", max.getTime(), javaMaxTime.toInstant().toEpochMilli());
+
+    pstmt.close();
   }
 
   private static Timestamp getTimestamp(int y, int m, int d, int h, int mn, int se, int f,

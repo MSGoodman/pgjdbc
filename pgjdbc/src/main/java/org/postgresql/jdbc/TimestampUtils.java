@@ -860,12 +860,6 @@ public class TimestampUtils {
       return "24:00:00";
     }
 
-    int nano = localTime.getNano();
-    if (nanosExceed499(nano)) {
-      // Technically speaking this is not a proper rounding, however
-      // it relies on the fact that appendTime just truncates 000..999 nanosecond part
-      localTime = localTime.plus(ONE_MICROSECOND);
-    }
     appendTime(sbuf, localTime);
 
     return sbuf.toString();
@@ -880,12 +874,6 @@ public class TimestampUtils {
 
     sbuf.setLength(0);
 
-    int nano = offsetDateTime.getNano();
-    if (nanosExceed499(nano)) {
-      // Technically speaking this is not a proper rounding, however
-      // it relies on the fact that appendTime just truncates 000..999 nanosecond part
-      offsetDateTime = offsetDateTime.plus(ONE_MICROSECOND);
-    }
     LocalDateTime localDateTime = offsetDateTime.toLocalDateTime();
     LocalDate localDate = localDateTime.toLocalDate();
     appendDate(sbuf, localDate);

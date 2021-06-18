@@ -139,6 +139,8 @@ public interface PGConnection {
    */
   void addDataType(String type, Class<? extends PGobject> klass) throws SQLException;
 
+  void addNotificationListener(PGNotificationListener notificationListener) throws SQLException;
+
   /**
    * Set the default statement reuse threshold before enabling server-side prepare. See
    * {@link org.postgresql.PGStatement#setPrepareThreshold(int)} for details.
